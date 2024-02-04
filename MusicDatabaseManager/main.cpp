@@ -1,9 +1,12 @@
-// MusicDatabaseManager.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+/* Main.cpp: Currently contains test code for SQLite
+ */
 
-#include <stdio.h>
-#include <stdint.h>
 #include <sqlite3.h>
+#include <filesystem>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 
 static int callback(void* NotUsed, int argc, char** argv, char** azColName)
 {
@@ -20,39 +23,34 @@ int main(int argn, char** argv)
     char* zErrMsg = 0;
     int rc;
 
-    if (argn != 3) {
-        fprintf(stderr, "Usage: %s DATABASE SQL-STATEMENT\n", argv[0]);
-        fprintf(stderr, "Number of args: %d\n", argn);
-        return(1);
-    }
+    const char dbLocation[] = "db/TestDatabase.db";
+    const char sqlStatement[] = "select * from jobs;\n";
+
+    filesystem::path cwd = filesystem::current_path();
+    cout << format("cwd: {}\n", cwd.string());
 
     // Open Database based on name given
-    rc = sqlite3_open(argv[1], &db);
+    if (!filesystem::exists("db")) {
+        cerr << format("Database directory does not exist at \"{}\"\n", cwd.string());
+        return(1);
+    }
+    rc = sqlite3_open(dbLocation, &db);
     if (rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        cerr << format("Can't open database: {}\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         return(1);
     }
 
-    // 
-    rc = sqlite3_exec(db, argv[2], callback, 0, &zErrMsg);
+    // Evaluate SQL statement given as string argument. Capable of running multiple SQL statement
+    rc = sqlite3_exec(db, sqlStatement, callback, 0, &zErrMsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        cerr << format("SQL error: {}\n", zErrMsg);
         sqlite3_free(zErrMsg);
     }
 
     // Exit
     sqlite3_close(db);
     return(0);
+
+    // Test Commit
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
