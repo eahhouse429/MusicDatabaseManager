@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)/libs/sqlite3</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +131,10 @@
   <ItemGroup>
     <ClCompile Include="libs\sqlite3\sqlite3.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="sqlinput.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sqlinput.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

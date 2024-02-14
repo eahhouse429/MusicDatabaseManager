@@ -6,16 +6,9 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
+#include "sqlinput.h"
 
-static int callback(void* NotUsed, int argc, char** argv, char** azColName)
-{
-    for (int i = 0; i < argc; i++) {
-        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-    }
-    printf("\n");
-    return(0);
-}
+using namespace std;
 
 int main(int argn, char** argv)
 {
@@ -24,7 +17,6 @@ int main(int argn, char** argv)
     int rc;
 
     const char dbLocation[] = "db/TestDatabase.db";
-    const char sqlStatement[] = "select * from jobs;\n";
 
     filesystem::path cwd = filesystem::current_path();
     cout << format("cwd: {}\n", cwd.string());
@@ -42,7 +34,7 @@ int main(int argn, char** argv)
     }
 
     // Evaluate SQL statement given as string argument. Capable of running multiple SQL statement
-    rc = sqlite3_exec(db, sqlStatement, callback, 0, &zErrMsg);
+    rc = sqlinput_execfile(db, "db/sqlStatement.sql", 0, &zErrMsg);
     if (rc != SQLITE_OK) {
         cerr << format("SQL error: {}\n", zErrMsg);
         sqlite3_free(zErrMsg);
@@ -51,6 +43,4 @@ int main(int argn, char** argv)
     // Exit
     sqlite3_close(db);
     return(0);
-
-    // Test Commit
 }

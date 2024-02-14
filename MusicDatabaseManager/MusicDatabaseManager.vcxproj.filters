@@ -21,5 +21,13 @@
     <ClCompile Include="libs\sqlite3\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sqlinput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sqlinput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
