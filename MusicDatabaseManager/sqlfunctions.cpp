@@ -5,11 +5,12 @@
 #include <format>
 #include <vector>
 
-#include "config.h"
 #include "sqlfunctions.h"
 
 /* Globals */
 int sqlPrintTablePrintHeader = 0;
+const char databaseDirectory[] = "db";
+const char musicDatabaseName[] = "TestDatabase.db";
 
 using namespace std;
 
@@ -39,7 +40,8 @@ int sqlSetupMusicDatabase(sqlite3** db)
 
     // SQL Commands to check Database Tables
     // If tables don't exist, make them
-    /* TODO */
+    fs::path sqlfile = databaseLocation / "CreateTable.sql";
+    rc = sqlExecFile(*db, sqlfile.string().c_str());
 
     return(rc);
 }
@@ -48,10 +50,10 @@ int sqlPrintTable(sqlite3* db, const char* tablename)
 {
     int rc = 0;
     char* zErrMsg;
-    string sql = format("Select * from {};", tablename);
+    string query = format("Select * from {};", tablename);
     vector<int> colSize;
 
-    rc = sqlite3_exec(db, sql.c_str(), sqlPrintTableCallbackSetup, (void*)&colSize, &zErrMsg);
+    rc = sqlite3_exec(db, query.c_str(), sqlPrintTableCallbackSetup, (void*)&colSize, &zErrMsg);
     if (rc != SQLITE_OK) {
         cerr << format("Error: sqlPrintTableCallbackSetup: SQL Error = {}\n", zErrMsg);
         sqlite3_free(zErrMsg);
@@ -59,7 +61,7 @@ int sqlPrintTable(sqlite3* db, const char* tablename)
     }
 
     sqlPrintTablePrintHeader = 1;   // Global
-    rc = sqlite3_exec(db, sql.c_str(), sqlPrintTableCallbackPrint, (void*)&colSize, &zErrMsg);
+    rc = sqlite3_exec(db, query.c_str(), sqlPrintTableCallbackPrint, (void*)&colSize, &zErrMsg);
     if (rc != SQLITE_OK) {
         cerr << format("Error: sqlPrintTableCallbackPrint: SQL Error = {}\n", zErrMsg);
         sqlite3_free(zErrMsg);
@@ -125,6 +127,34 @@ static int sqlPrintTableCallbackPrint(void* special, int argc, char** argv, char
 
     return(0);
 }
+
+/* FIXME, string not being read correctly. Probably readline isn't appending to string */
+int sqlExecFile(sqlite3* db, const char* filename)
+{
+    int rc = 0;
+    char* zErrMsg = 0;
+    string query;
+    ifstream ifs;
+    char buf[256] = "\0";
+
+    ifs.open(filename, ifstream::in);
+    while (ifs.good()) {
+        ifs.getline(buf, 256);
+        if (ifs.bad()) {
+            cerr << "Error: sqlExecFile: Bad Line read.\n";
+            break;
+        }
+
+        query.append(buf);
+    }
+
+    cout << format("string = {}\n", query);
+
+    rc = sqlite3_exec(db, query.c_str(), NULL, 0, &zErrMsg);
+
+    return(rc);
+}
+
 
 
 // Defunc (needs update)
